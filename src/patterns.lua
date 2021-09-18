@@ -25,9 +25,10 @@ local match = l.match  -- match a pattern against a string
 
 local dot = P"."
 local sign = (P"+" + P"-")
-
 local zero = P"0"
 local one = P"1"
+
+local eol = P"\n\r" + P"\r\n" + P"\n" + P"\r" --End of line
 
 local function maybe(p)
     return p^0
@@ -35,13 +36,18 @@ end
 
 --Any
 local any = P(1)
+local asci = R'!~'
 
 --Any to white space
 local towsp = P" "^0 * (P(1) - P" ")^1
 
 local int = sign^-1 * R('09')^0
-local nat = R('09')^0
+local nat = R('19') * R('09')^0
 local float = R('09')^0 *P('.') * R('09')^1
+local word = (R"AZ" + R"az")^0
+local spaces = P" "^1
+local sentence = (any - dot)^1
+local paragraph = (any - eol)^1
 
 local num = sign^-1 *
     R('09')^0 *
@@ -56,6 +62,7 @@ local ip4 = odf * dot * odf * dot * odf * dot * odf --IP4 addrees in decimal for
 
 return {
     any = any,
+    asci = asci,
     int = int,
     nat = nat,
     num = num,
@@ -63,5 +70,9 @@ return {
     ip4 = ip4,
     zeros = zero^1,
     ones = one^1,
-    towsp = towsp
+    towsp = towsp,
+    word = word,
+    spaces = spaces,
+    sentence = sentence,
+    paragraph = paragraph
 }

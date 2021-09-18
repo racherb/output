@@ -22,34 +22,31 @@ Block ::= ('block:' | 'b:') Block_Name '{' (((Pattern | Text | Record | Block | 
 
 Ejemplos:
 
-```
+```Lua
 block:PingResponse {
     record:PING {
-        p:Info ~64 bytes from %%(server) %%(ip): icmp_seq=$$(seq) ttl=%%(ttl) time=%%(time) %%(um)~,
-        p:NameResolutionFail ~ping: %%(server): Temporary failure in name resolution~
+        p:Info ~64 bytes from ${ip:ip4}: icmp_seq=${seq:nat} ttl=${ttl:nat} time=${time:float} ${um:ms}~,
+        p:NameResolutionFail ~ping: ${server}: Temporary failure in name resolution~
     }
 }
 ```
 
 **Pattern value sintax**
 
-El valor del patron se define entre ~pattern_value~ y tiene la forma general LPEG:
+El valor del patron se define entre virgulillas, por ejemplo: ~*pattern value*~ y tiene la forma general LPEG:
 
 ```
-pattern_value -> value * value * ... * value
+*pattern value* -> value * value * ... * value
 ```
 
-Caracteristicas generales:
+Donde *value* puede ser:
 
-- Cada pattern value esta conformado por strings separados por un espacio.
-- Los espacios entre strings son funciones en si mismas:
-  - 1 espacio en blanco representa un espacio en blanco
-  - 2 espacios en blanco representa uno o varios espacios en blanco
-  - 3 espacios en blanco representa uno o varios espacios de tipo " \t \v"
-- ...
+- **literal**: Un valor literal de cadena
+- **${.name:type|type**: Un tipo, un patron lpeg, una funcion o un valor literal.
 
-- **$(name:type)**: Es un tipo, un nombre de variable o un patron lpeg
-- **$(.name x, y)**: Es una funcion
+**name** es un nombre arbitrario opcional asignado para capturar el valor que hace match con la especificacion de *type*.
+
+Si no desea capturar el valor entonces puede ignorar el nombre utilizando la forma **${:type}**
 
 Ejemplo:
 
@@ -57,12 +54,12 @@ Ejemplo:
 ~$(:int) bytes from $(server:hostname) $(ip:ip4): icmp_seq=$(:int) ttl=$(ttl) time=$(time:float) $(um)~
 ```
 
-- *$(:int)*: Valida que el valor es de tipo *integer* y no captura su valor,
-- *$(server:hostname)*: Valida que el valor es de tipo *hostname* y captura el valor en la variable *server*.
-- *$(ip:ip4)*: Valida que es de tipo *ip4* y captura el valor en la variable *ip*.
-- *$(seq:seq)*: Valida que el valor es de tipo *secuencia* y guarda el valor en la variable *seq*.
-- *$(time:float)*: Valida que el valor es de tipo *float* y captura su valor en la variable *time*.
-- *$(um)*: Obtiene el valor en la variable *um*.
+- *${:int}*: Valida que el valor es de tipo *integer* y no captura su valor,
+- *${server:hostname}*: Valida que el valor es de tipo *hostname* y lo captura en la variable *server*.
+- *${ip:ip4}*: Valida que es de tipo *ip4* y captura el valor en la variable *ip*.
+- *${seq:seq}*: Valida que el valor es de tipo *secuencia* y guarda el valor en la variable *seq*.
+- *${time:float}*: Valida que el valor es de tipo *float* y captura su valor en la variable *time*.
+- *${um}*: Obtiene el valor en la variable *um*.
 
 Tipos:
 
