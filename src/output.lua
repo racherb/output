@@ -240,47 +240,6 @@ local function split_n (str, sep, nitems)
     return t
 end
 
-local function capture(str_patt, mb)
-    print(str_patt)
-    if sandbox_env[str_patt] or l.type(str_patt)=='pattern' then
-        if arg then
-            if mb==true then
-                return 'C(maybe('..str_patt..'))'
-            else
-                return 'C('..str_patt..')'
-            end
-        else
-            if mb==true then
-                return 'C(maybe('..str_patt..'))'
-            else
-                return 'C('..str_patt..')'
-            end
-        end
-    else
-        return 'C(P"'..str_patt..'")'
-    end
-end
-
-local function noncapture(str_patt, mb)
-    if sandbox_env[str_patt] or l.type(str_patt)=='pattern' then
-        if arg then
-            if mb==true then
-                return ('maybe('..str_patt..')')
-            else
-                return str_patt
-            end
-        else
-            if mb==true then
-                return 'maybe('..str_patt..')'
-            else
-                return str_patt
-            end
-        end
-    else
-        return 'C(P"'..str_patt..'")'
-    end
-end
-
 local function literal(str_patt)
     return 'P"'..str_patt..'"'
 end
@@ -394,10 +353,18 @@ local function tolpeg(str)
                 local or_pat = table.concat(or_tbl, ' + ')
 
                 if var_name and var_name ~= '' then
-                    lpeg_patt[#lpeg_patt+1] = 'C('..or_pat..')' --capture(or_pat, is_maybe)
                     vars[#vars+1] = var_name
+                    if is_maybe==true then
+                        lpeg_patt[#lpeg_patt+1] = 'C(maybe('..or_pat..'))'
+                    else
+                        lpeg_patt[#lpeg_patt+1] = 'C('..or_pat..')'
+                    end
                 else
-                    lpeg_patt[#lpeg_patt+1] = or_pat --, is_maybe)
+                    if is_maybe==true then
+                        lpeg_patt[#lpeg_patt+1] = 'maybe('..or_pat..')'
+                    else
+                        lpeg_patt[#lpeg_patt+1] = or_pat
+                    end
                 end
                 lpeg_patt[#lpeg_patt+1] = literal(cont)
             else
